@@ -1,0 +1,32 @@
+name: github-repo-stats
+
+on:
+  schedule:
+    # Daily, near end of day UTC so the last data point of the day is
+    # as complete as possible. Off-peak minute (GitHub advises
+    # avoiding :00).
+    - cron: "37 23 * * *"
+  workflow_dispatch:
+
+jobs:
+  ghrs:
+    name: ghrs for ${{ matrix.repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      # Jobs share one data branch; serialize pushes.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        repo:
+          - martenzi/ChatVault
+          - martenzi/chat2md
+          - martenzi/obsidian-text-extractor
+          - martenzi/elixira
+          - martenzi/openclaw
+    steps:
+      - name: run-ghrs
+        uses: jgehrcke/github-repo-stats@v1.4.2
+        with:
+          repository: ${{ matrix.repo }}
+          ghtoken: ${{ secrets.GHRS_GITHUB_API_TOKEN }}
+          ghpagesprefix: https://martenzi.github.io/github-stats
