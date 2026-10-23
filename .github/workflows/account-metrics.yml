@@ -30,4 +30,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add metrics
           git commit -m "metrics snapshot" || echo "no changes"
-          git push
+          # Data branch is shared with ghrs jobs — rebase then retry.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin github-repo-stats && git push && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
