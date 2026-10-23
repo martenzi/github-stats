@@ -1,0 +1,33 @@
+name: account-metrics
+
+on:
+  schedule:
+    # After the ghrs run (23:37) — captures counters GHRS doesn't cover.
+    - cron: "47 23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: github-repo-stats
+          path: data
+      - name: snapshot metrics
+        working-directory: data
+        env:
+          GH_TOKEN: ${{ secrets.GHRS_GITHUB_API_TOKEN }}
+        run: python3 ../scripts/snapshot_metrics.py
+      - name: commit and push
+        working-directory: data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add metrics
+          git commit -m "metrics snapshot" || echo "no changes"
+          git push
